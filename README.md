@@ -1,6 +1,8 @@
 # How JavaScript Works
 더글러스 크락포드, How JavaScript Works(2020) 한글 번역판
 
+https://purelledhand.github.io/how-javascript-works/
+
 ## 목차
 
   1. [이름](#이름)
@@ -26,8 +28,11 @@
 
 ### 예약어
 
-```
-arguments await break case catch class const continue debugger default delete do else enum eval export extends false finally for function if implements import in Infinity instanceof interface let NaN new null package private protected public return static super switch this throw true try typeof undefined var void while with yield
+```javascript
+arguments await break case catch class const continue debugger default delete do
+else enum eval export extends false finally for function if implements import in Infinity instanceof
+interface let NaN new null package private protected public return static super switch
+this throw true try typeof undefined var void while with yield
 ```
 
 
@@ -37,9 +42,111 @@ arguments await break case catch class const continue debugger default delete do
 
 ## 숫자
 
-자바스크립트의 `number`는 실수(real number)에서 영감을 받았지만, 진짜 실수는 아닙니다. 수학에 대한 이해나 직관은 자바스크립트의 `number`에 완벽하게 적용되지는 않습니다.
+자바스크립트의 `number`는 실수(real number)에서 영감을 받았지만, 진짜 실수는 아닙니다. 수학에 대한 이해나 직관이 자바스크립트의 `number`에 완벽하게 적용되지는 않습니다.
 
-자바스크립트는 하나의 숫자형  `number` 를 가지고 있습니다. `number`는 인텔 iAPX-432 프로세서를 위해 처음 개발된 IEEE 부동소수점 연산 표준(IEEE 754)을 차용했습니다.
+자바스크립트는 하나의 숫자형  `number` 를 가지고 있는데 이 숫자형은 인텔 iAPX-432 프로세서를 위해 처음 개발된 IEEE 부동소수점 연산 표준(IEEE 754)을 차용했습니다. 자바스크립트는 IEEE 754 표준 전체를 사용하지는 않으며 자바가 사용하는 일부분 중의 일부분을 사용합니다. 자바스크립트의 `number는` 64비트 2진 부동소수점 타입이라는 점에서 자바의 `double`과 아주 밀접합니다. 
+
+부동소수점의 아이디어는 두 개의 수로 하나의 숫자를 표현하는 것입니다. 
+
+* 첫 번째 수: 계수, 유효 숫자, 분수, 또는 가수
+* 두 번째 수: 지수
+  * 첫 번째 수에서 10진 소수점(또는 2진 소수점)의 위치를 나타냅니다.
+
+두 번째 수인 지수는 부호와 유효 숫자 사이의 공간을 차지합니다.
+
+> 부호 * 유효 숫자 * (2**지수)
+
+지수는 부호가 있는 정수로 표현되어서 숫자를 마치 64비트 정수인 것처럼 만들어 다른 숫자와 비교할 수 있습니다. 그래서 큰 성능상의 이득을 볼 수 있습니다. 지수는 또한 `NaN`, `Infinity` 그리고 `아주 작은 수`나 `영(0)`을 표현할 수 있습니다.
+
+### 영(0)
+
+자바스크립트에는 영(0)으로 표현되지만 영(0)이 아닌 값이 있습니다. IEEE 754 표준에는 `0`과 `-0`이라는 두 개의 0이 있습니다. 자바스크립트는 이 이상한 현상을 숨기기 위해 열심히 노력해왔습니다. 아래와 같은 경우를 제외하면 `-0`이 존재한다는 사실을 몰라도 됩니다.
+
+```javascript
+(1 / 0) === (1 / -0) // false
+Object.is(0, -0) //false
+```
+
+### 숫자 리터럴
+
+자바스크립트에는 18437736874454810627개의 불변 숫자 객체가 내장되어 있는데, 이들은 각각의 고유한 숫자를 나타냅니다. 숫자 리터럴은 각 리터럴의 값과 가장 잘 맞는 숫자 객체에 대한 참조를 생성합니다.
+
+정수에 대한 숫자 리터럴은 간단하게 연속한 10진수 숫자들이라고 할 수 있습니다. 하지만 기수 접두사를 써서 다른 밑수를 사용할 수도 있습니다. 아래 모든 리터럴들은 2018이라는 숫자 참조를 생성합니다.
+
+```
+0b11111100010 // 2진수
+0o3742 // 8진수
+2018.00 // 10진수
+0x7E2 // 16진수
+```
+
+Infinity는 자바스크립트에서 표현하기에는 너무 큰 모든 숫자를 의미합니다.
+
+NaN은 'Not a Number'를 뜻하는 특별한 값이지만, `typeof` 연산자는 NaN을 "number"로 표시하기 때문에 매우 헷갈립니다. NaN은 문자열을 숫자로 변환하려고 했으나 실패했을 때 결과값으로 반환될 수 있습니다. 변환에 실패한 경우 오류가 발생하는 대신 NaN이 반환됩니다. 산술 연산자 역시 입력 중에 NaN이 있으면 그 결과로 NaN을 반환합니다.
+
+NaN과 NaN을 동등 연산자로 비교해 보면 `false`를 표시합니다. 이는 자바스크립트가 숨기지 않은 IEEE 754의 끔찍한 부분입니다. NaN에 대한 테스트는 다른 모든 숫자 값에 대한 equal 테스트와 다릅니다. 테스트 코드를 작성 할 때 문제가 될 수 있죠. 만약 테스트의 기댓값이 NaN이라면 실제 값이 NaN이라고 해도 항상 실패합니다.
+
+**값이 NaN인지 아닌지를 테스트하려면 `Number.isNaN(value)`를 사용하세요.** `Number.isFinite(value)`는 값이 NaN, Infinity, 또는 -Infinity인 경우 false를 반환합니다.
+
+### Number
+
+Number(number와 다릅니다)는 숫자를 만드는 함수입니다. 자바스크립트의 수는 불변 객체입니다. 수에 대한 typeof 연산자는 "number"를 반환합니다. Number 함수에는 `new`를 사용하면 안 됩니다.
+
+```javascript
+const good_example = Number("432")
+const bad_example = new Number("432")
+typeof good_example // "number"
+typeof bad_example // "object"
+good_example === bad_example // false
+```
+
+Number가 포함하는 상수들을 통해 수가 어떻게 동작하는지 살펴볼 수 있습니다.
+
+#### Number.EPSILON
+
+1에 더했을 때 1보다 큰 수를 만들어 낼 수 있는 가장 작은 양수입니다. `Number.EPSILON`보다 작은 수를 1을 더해도 그 수는 1과 같습니다. 0이 아닌 양수를 1에 더했는데도 1이라는 사실은 IEEE 754를 포함한 모든 고정 크기 부동소수점 시스템이 가지고 있는 특징입니다. 숫자 표현의 크기를 고정함으로써 생기는 장단점이라고 볼 수 있습니다.
+
+#### Number.MAX_SAFE_INTEGER
+
+약 9천조입니다. 자바스크립트의 숫자형은 Number.MAX_SAFE_INTEGER까지의 모든 정수형을 표현할 수 있으므로 다른 정수형 타입이 필요 없습니다. 자바스크립트의 숫자형은 부호를 포함한 54비트를 사용합니다.
+
+Number.MAX_SAFE_INTEGER보다 큰 수에 1을 더하는 것은 0을 더하는 것과 같습니다. 자바스크립트는 값이나 연산 결과, 그리고 중간 연산 값들이 전부 -Number.MAX_SAFE_INTEGER과 Number.MAX_SAFE_INTEGER 사이의 정수 값인 경우에만 올바른 정수 연산을 할 수 있습니다. 이를 벗어난다면 분배법칙, 결합법칙과 같은 수학적 연산이 보장되지 않아 숫자를 더하는 순서에 따라 그 합이 바뀌는 등의 연산 오류가 발생할 수 있습니다.
+
+숫자가 안전한 범위 내에 있는 경우 `true`를 반환하는 `Number.isSafeInteger(number)`를 통해 숫자의 안정성을 확인할 수 있습니다. `Number.isInteger(number)`는 숫자가 안전한 범위 밖에 있어도 `true`를 반환합니다.
+
+#### Number.MAX_VALUE
+
+자바스크립트가 표현할 수 있는 가장 큰 숫자를 의미합니다. 값은 `Number.MAX_SAFE_INTEGER * 2 ** 971` 입니다.
+
+Number.MAX_VALUE에 안전한 범위 안에 있는 어떤 양의 정수를 더해도 그 값은 여전히 Number.MAX_VALUE입니다. 계산 결과로 Number.MAX_VALUE를 만들어내는 프로그램은 뭔가 잘못되었을 가능성이 있습니다. Number.MAX_SAFE_INTEGER를 넘는 모든 결과가 미심쩍습니다. IEEE 754 표준은 넓은 범위를 보장해주지만, 실수로 이어지기 쉽습니다.
+
+#### Number.MIN_VALUE
+
+자바스크립트가 표현할 수 있는 영(0) 보다 큰 수 중 가장 작은 수를 의미합니다. 값은 `2 ** -1074` 입니다. Number.MIN_VALUE보다 작은 양수는 영(0)과 구별이 불가능합니다.
+
+### Math 객체
+
+Math 객체는 Number에 내장되어 있어야 할 중요한 여러 함수를 포함하고 있습니다. 자바의 나쁜 영향 중 한 가지입니다. 삼각 함수, 대수 함수 외에도 연산자로 제공되었어야 할 여러 유용한 함수들이 있습니다.
+
+* Math.floor, Math.trunc는 수에서 정수를 만들어 냅니다.
+  * Math.floor는 더 작은 정수를
+  * Math.trunc는 좀 더 영(0)에 가까운 정수를 만들어 냅니다.
+
+```javascript
+Math.floor(-2.5) // -3
+Math.trunc(-2.5) // -2
+```
+
+* Math.min, Math.max 
+* Math.random
+
+### 숫자 속의 괴물
+
+자바스크립트는 10진 소수 값, 특히 화폐 단위의 처리가 안좋은 것으로 유명합니다. 0.1 또는 그 외 10진 소수 값을 프로그램에 입력하면 자바스크립트는 그 값을 제대로 처리하지 못합니다. 그래서 그 값을 정확히 표현할 수 있는 alias를 사용합니다.
+
+프로그램에 10진수 소수 값을 입력하거나 10진수 소수 값이 포함된 데이터를 읽어들이는 것은 프로그램에 오류를 집어넣는 것과 같습니다. 0.3을 부동소수점의 구성 요소로 분해해보면 0.1 + 0.2와 다른 결과를 얻습니다. 또한 100 / 3은 33.333333333333336이라는 결과를 내놓습니다.
+
+그 어떤 유한 시스템도 실수를 정확하게 표현할 수는 없지만 10진 소수점으로 이루어진 값을 통해 사람들이 필요로 하는 수의 값을 정확하게 표현하는 것은 가능합니다. 자바스크립트를 대체할 다음 세대 언어에서 10진 소수점 값을 정확하게 표현할 수 있는 단일 숫자 시스템을 지원하기 전까지는 **최대한 안전한 정수 범위 내에서 작업하세요.** 모든 화폐 값을 센트 (1/100 달러) 단위로 변환해서 처리하면 정확한 정수 값으로 처리할 수 있습니다. 비슷한 크기의 숫자끼리 더하면 다른 크기의 숫자를 더하는 경우에 비해 오류가 덜 발생합니다. 그렇기 때문에 부분의 합을 더하는 것이 개별 값을 전부 더하는 것보다 정확한 것입니다.
 
 
 
