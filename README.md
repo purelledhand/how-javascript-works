@@ -7,6 +7,7 @@ https://purelledhand.github.io/how-javascript-works/
 
   1. [이름](#이름)
   2. [숫자](#숫자)
+  7. [배열](#배열)
 
 ## 이름
 
@@ -152,3 +153,78 @@ Math.trunc(-2.5) // -2
 
 **[⬆ back to top](#목차)**
 
+
+
+## 배열
+자바스크립트의 배열은 객체이지만 현재 자바스크립트에서의 배열은 아래 네 가지 관점에서 객체와 다릅니다.
+
+* 배열의 `length` 속성은 배열이 담고 있는 요소의 개수를 의미하지 않습니다. 그 대신, 가장 큰 인덱스보다 1 큰 값을 나타냅니다. 예를 들어 배열에 요소가 네 개 있고 마지막 요소의 인덱스가 10이라면, `length`는 11입니다. 
+* 배열은 `Object.prototype`보다 더 적합한 메서드들은 가지고 있는 `Array.prototype`을 상속합니다.
+* 배열은 객체 리터럴이 아닌 배열 리터럴을 통해 생성됩니다. 배열 리터럴은 `[]` 안에 expression이 없을 수 있으며 콤마를 통해 expression를 나열할 수 있어 syntax가 더욱 간단합니다.
+* JSON은 배열과 객체를 다르게 취급하지만 자바스크립트는 둘을 비슷하게 취급합니다.
+
+`typeof` 연산자는 배열에 대해서 "object"를 반환하는데, 잘못되었습니다. 그렇기 때문에 배열인지 확인하고자 한다면 `Array.isArray(value)`를 사용해야 합니다.
+
+```javascript
+const what_is_it = new Array(1000);
+typeof what_is_it // "object"
+Array.isArray(what_is_it) // true
+```
+
+### 초기화
+
+새로운 배열은 두 가지 방법으로 만들 수 있습니다.
+
+* 배열 리터럴
+* new Array(정수)
+
+```javascript
+let my_little_array = new Array(10).fill(0); // my_little_array is [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+let same_thing = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+my_little_array === same_thing // false
+```
+
+`my_little_array`와 `same_thing`은 값이 같습니다. 하지만 객체와 마찬가지로 배열은 실제로 같은 배열인 경우에만 같다고 봅니다.
+
+### 스택과 큐
+
+`shift` 메서드는 `pop` 메서드와 비슷하지만, 배열의 마지막 요소 대신 0번째 요소를 제거하고 리턴합니다. `unshift` 메서드는 `push`와는 달리 배열의 가장 앞에 새로운 요소를 추가합니다. `shift`와 `unshift` 메서드는 `pop`, `push`에 비해 많이 느린데, 이는 배열이 커질수록 심해집니다. `shift`와 `push`를 써서 배열의 가장 뒤에 새로운 아이템을 추가하고 가장 앞에서 아이템을 꺼내 쓰는 큐를 구현할 수 있습니다.
+
+### 검색
+
+`indexOf` 메서드는 인자로 전달받은 값을 배열의 0번째 요소부터 비교하면서 찾습니다. 일치하는 값을 가지는 배열의 요소를 찾으면 검색을 중단하고 해당 요소의 인덱스 값을 리턴합니다. 배열에 찾는 값이 없다면 -1을 리턴합니다. 
+
+`lastIndexOf` 함수는 `indexOf`와 비슷하지만 배열의 마지막 인덱스부터 검색합니다. `indexOf`와 마찬가지로 값을 찾지 못하면 -1을 리턴합니다.
+
+`includes` 함수는 `indexOf` 함수와는 다르게 값이 있다면 true, 없다면 false를 리턴합니다.
+
+### reduce
+
+`reduce` 메서드는 배열을 하나의 값으로 축약합니다. 두 개의 매개변수를 받는 함수를 인자로 받으며, 배열의 요소가 하나의 값이 될 때까지 전달받은 함수에 두 인자를 전달하여 계속 호출합니다.
+
+`reduce` 메서드는 두 가지 방식으로 설계할 수 있습니다. 첫 번째 방식은 전달한 함수를 배열의 모든 요소에 대해 호출하도록 하는 것입니다. 이 경우 초기 값이 지정되어야 합니다.
+
+```javascript
+function add(reduction, element) {
+  return reduction + element;
+}
+
+let my_little_array = [3, 5, 7, 11];
+let total = my_little_array.reduce(add, 0); // total is 26
+```
+
+`add` 함수가 리턴하는 값은 다음 `add` 함수 호출 시 reduction의 인자로 전달됩니다.
+
+초기 값이 꼭 0 이어야 하는 것은 아닙니다. 곱셈 함수가 reduction이라면 초기 값은 1이어야 하고, `Math.max` 함수를 `reduce`에 전달한다면 초기 값은 `-Infinity`여야 합니다.
+
+두 번째 방식으로 `reduce`를 사용하면 초기 값을 지정하지 않아도 되며 reduction 함수가 한 번 덜 호출됩니다. reduction 함수가 처음 호출 될 때 0번째와 1번째 요소를 인자로 받습니다. 0번째 요소가 초기 값이 되는 것입니다.
+
+```javascript
+total = my_little_array.reduce(add); // 26
+```
+
+이 방식은 `add` 함수가 한 번 덜 호출되고, 초기화 값을 잘못 설정하여 문제가 생기는 일도 없습니다.
+
+초기 `reduce` 값을 전달하면 전달한 함수는 배열의 모든 요소마다 호출하지만, 초기 `reduce` 값을 전달하지 않으면 0번째 배열 요소가 초기 축약 값으로 사용됩니다.
+
+`reduceRight` 함수는 배열의 끝에서 시작한다는 것을 제외하면 `reduce` 함수와 동일합니다.
